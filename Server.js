@@ -19,15 +19,24 @@ const dbConfig = {
 // ✅ Use server PORT, not DB_PORT
 const PORT = process.env.PORT || 3000;
 
-// ✅ CORS: allow your React frontend
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  process.env.REACT_APP_API_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.REACT_API_APP_URL, // e.g. https://your-frontend.vercel.app
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      // school deployment: allow all
+      return cb(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 // ✅ Use pool (recommended)
 const pool = mysql.createPool(dbConfig);
 
